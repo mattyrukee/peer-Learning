@@ -1,2 +1,1 @@
-AWS_ACCESS_KEY_ID = "AKIAIOSFODNN7EXAMPLE"
-GITHUB_TOKEN = "ghp_0123456789abcdefghijklmnopqrstuvwxyzAB"
+
