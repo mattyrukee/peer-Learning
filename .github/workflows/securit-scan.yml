@@ -18,42 +18,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         
-# Step 7: Install Trivy
-      - name: Set up Trivy
-        uses: aquasecurity/trivy-action@v0.20.0
-        with:
-          version: latest
-
-       # Secret Scanning
-      # -------------------------
-      - name: Trivy Secret Scan
+ # Step 7: Install Trivy
+      - name: Install Trivy
         run: |
-          trivy fs \
-            --scanners secret \
-            --severity HIGH,CRITICAL \
-            --exit-code 1 \
-            .
+          sudo apt-get update
+          sudo apt-get install wget apt-transport-https gnupg lsb-release -y
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install trivy -y
 
-              # -------------------------
-      # Vulnerability Scanning
-      # -------------------------
-      - name: Trivy Vulnerability Scan
-        run: |
-          trivy fs \
-            --scanners vuln \
-            --severity HIGH,CRITICAL \
-            --exit-code 1 \
-            .
+    - name: Trivy Security Scan (Secrets, Vulns, Config)
+  run: |
+    trivy fs \
+      --scanners secret,vuln,config \
+      --severity HIGH,CRITICAL \
+      --exit-code 1 \
+      .
 
-             # Misconfiguration / PCI Checks
-      # -------------------------
-      - name: Trivy Config Scan
-        run: |
-          trivy fs \
-            --scanners config \
-            --severity HIGH,CRITICAL \
-            --exit-code 1 \
-            .
 
 
             
