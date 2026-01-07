@@ -28,36 +28,28 @@ jobs:
           sudo apt-get update
           sudo apt-get install trivy -y
 
-   # Secret Scanning
-      # -------------------------
-      - name: Trivy Secret Scan
-        run: |
-          trivy fs \
-            --scanners secret \
-            --severity HIGH,CRITICAL \
-            --exit-code 1 \
-            .
+# -------------------------
+# Secret Scanning (STRICT)
+# -------------------------
+- name: Trivy Secret Scan
+  run: |
+    trivy fs \
+      --scanners secret \
+      --severity MEDIUM,HIGH,CRITICAL \
+      --exit-code 1 \
+      .
 
-              # -------------------------
-      # Vulnerability Scanning
-      # -------------------------
-      - name: Trivy Vulnerability Scan
-        run: |
-          trivy fs \
-            --scanners vuln \
-            --severity HIGH,CRITICAL \
-            --exit-code 1 \
-            .
+# -------------------------
+# Vulnerability + PCI Config
+# -------------------------
+- name: Trivy Vuln & Config Scan
+  run: |
+    trivy fs \
+      --scanners vuln,config \
+      --severity HIGH,CRITICAL \
+      --exit-code 1 \
+      .
 
-             # Misconfiguration / PCI Checks
-      # -------------------------
-      - name: Trivy Config Scan
-        run: |
-          trivy fs \
-            --scanners config \
-            --severity HIGH,CRITICAL \
-            --exit-code 1 \
-            .
 
 
             
