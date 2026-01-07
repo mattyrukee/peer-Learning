@@ -64,11 +64,11 @@ trivy fs --scanners secret --severity MEDIUM,HIGH,CRITICAL --exit-code 1 .
 # Vulnerabilities (OS/dependencies)
 trivy fs --scanners vuln --severity HIGH,CRITICAL --exit-code 1 .
 
-# # Config scanning (with custom rules for generic configs)
-# trivy fs --scanners config --config .trivy-config.yaml --exit-code 1 .
+# Config scanning (with custom rules for generic configs)
+trivy fs --scanners config --config .trivy-config.yaml --exit-code 1 .
 
-# Config - include MEDIUM
-trivy fs --scanners config --severity MEDIUM,HIGH,CRITICAL --exit-code 1 .
+# # Config - include MEDIUM
+# trivy fs --scanners config --severity MEDIUM,HIGH,CRITICAL --exit-code 1 .
 
 
 
