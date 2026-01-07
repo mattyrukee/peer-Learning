@@ -1,5 +1,3 @@
 FROM ubuntu:18.04
-RUN apt-get update && apt-get install -y curl
-USER root
-RUN echo "root ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+RUN apt-get update && apt-get install -y curl=7.58.0-2ubuntu3.12
 
