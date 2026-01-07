@@ -1,4 +1,0 @@
-database:
-  user: admin
-  password: admin123
-  ssl: false
