@@ -28,6 +28,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install trivy -y
 
+      # Cache Trivy DB
+      - name: Cache Trivy vulnerability database
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/trivy
+          key: ${{ runner.os }}-trivy-db
+          restore-keys: |
+            ${{ runner.os }}-trivy-
+
    # Secret Scanning
       - name: Trivy Secret Scan
         run: |
