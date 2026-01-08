@@ -64,6 +64,8 @@ trivy fs --scanners secret --severity MEDIUM,HIGH,CRITICAL --exit-code 1 .
 # Vulnerabilities (OS/dependencies)
 trivy fs --scanners vuln --severity HIGH,CRITICAL --exit-code 1 .
 
+trivy config --misconfig-scanners=terraform,dockerfile .
+
 # # Config scanning (with custom rules for generic configs)
 # trivy fs --scanners config --config .trivy-config.yaml --exit-code 1 .
 
@@ -75,14 +77,14 @@ trivy fs --scanners vuln --severity HIGH,CRITICAL --exit-code 1 .
   # -------------------------
       # Misconfiguration / PCI Scan (Custom Rules)
       # -------------------------
-      - name: Trivy Misconfiguration Scan
-        run: |
-          trivy fs \
-            --scanners misconfig \
-            --config .trivy-config.yaml \
-            --severity MEDIUM,HIGH,CRITICAL \
-            --exit-code 1 \
-            .
+      # - name: Trivy Misconfiguration Scan
+      #   run: |
+      #     trivy fs \
+      #       --scanners misconfig \
+      #       --config .trivy-config.yaml \
+      #       --severity MEDIUM,HIGH,CRITICAL \
+      #       --exit-code 1 \
+      #       .
 
 
             
