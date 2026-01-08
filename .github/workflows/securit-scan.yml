@@ -41,23 +41,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-trivy-
 
-      # # Download DB only if cache is empty
-      # - name: Download Trivy DB
-      #   run: |
-      #     trivy filesystem --cache-dir ~/.cache/trivy --download-db-only .
-
-   # Secret Scanning
-      - name: Trivy Secret Scan
-        run: |
-          trivy fs \
-            --scanners secret \
-            --severity HIGH,CRITICAL \
-            --exit-code 1 \
-            .
-
-              # -------------------------
-      # Vulnerability Scanning
-      - name: Trivy Vulnerability Scan
+     
+      # FIRST scan (populates DB if cache is empty)
+      - name: Trivy Vulnerability Scan (DB bootstrap)
         run: |
           trivy fs \
             --scanners vuln \
@@ -65,15 +51,55 @@ jobs:
             --exit-code 1 \
             .
 
+      # Subsequent scans reuse DB
+      - name: Trivy Secret Scan
+        run: |
+          trivy fs \
+            --scanners secret \
+            --severity HIGH,CRITICAL \
+            --skip-db-update \
+            --exit-code 1 \
+            .
+
       - name: Trivy Misconfiguration (PCI) Scan
         run: |
-         trivy fs \
-         --scanners misconfig \
-         --misconfig-scanners=dockerfile,kubernetes,terraform,cloudformation,yaml,json \
-         --config-check ./policies \
-         --severity MEDIUM,HIGH,CRITICAL \
-         --exit-code 1 \
-         .
+          trivy fs \
+            --scanners misconfig \
+            --misconfig-scanners=dockerfile,kubernetes,terraform,cloudformation,yaml,json \
+            --config-check ./policies \
+            --severity MEDIUM,HIGH,CRITICAL \
+            --skip-db-update \
+            --exit-code 1 \
+            .
+
+   # # Secret Scanning
+   #    - name: Trivy Secret Scan
+   #      run: |
+   #        trivy fs \
+   #          --scanners secret \
+   #          --severity HIGH,CRITICAL \
+   #          --exit-code 1 \
+   #          .
+
+   #     # -------------------------
+   #    # Vulnerability Scanning
+   #    - name: Trivy Vulnerability Scan
+   #      run: |
+   #        trivy fs \
+   #          --scanners vuln \
+   #          --severity HIGH,CRITICAL \
+   #          --exit-code 1 \
+   #          .
+
+   #    - name: Trivy Misconfiguration (PCI) Scan
+   #      run: |
+   #       trivy fs \
+   #       --scanners misconfig \
+   #       --misconfig-scanners=dockerfile,kubernetes,terraform,cloudformation,yaml,json \
+   #       --config-check ./policies \
+   #       --severity MEDIUM,HIGH,CRITICAL \
+   #       --exit-code 1 \
+   #       .
 
 # Secret scanning
 # trivy fs --scanners secret --severity MEDIUM,HIGH,CRITICAL --exit-code 1 .
