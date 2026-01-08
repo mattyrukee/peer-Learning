@@ -41,10 +41,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-trivy-
 
-      # Download DB only if cache is empty
-      - name: Download Trivy DB
-        run: |
-          trivy filesystem --cache-dir ~/.cache/trivy --download-db-only .
+      # # Download DB only if cache is empty
+      # - name: Download Trivy DB
+      #   run: |
+      #     trivy filesystem --cache-dir ~/.cache/trivy --download-db-only .
 
    # Secret Scanning
       - name: Trivy Secret Scan
