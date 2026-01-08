@@ -18,7 +18,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         
- # Step 7: Install Trivy
+ # Step: Install Trivy
       - name: Install Trivy
         run: |
           sudo apt-get update
@@ -29,7 +29,6 @@ jobs:
           sudo apt-get install trivy -y
 
    # Secret Scanning
-      # -------------------------
       - name: Trivy Secret Scan
         run: |
           trivy fs \
@@ -40,7 +39,6 @@ jobs:
 
               # -------------------------
       # Vulnerability Scanning
-      # -------------------------
       - name: Trivy Vulnerability Scan
         run: |
           trivy fs \
@@ -48,16 +46,6 @@ jobs:
             --severity HIGH,CRITICAL \
             --exit-code 1 \
             .
-
-      #        # Misconfiguration / PCI Checks
-      # # -------------------------
-      # - name: Trivy Config Scan
-      #   run: |
-      #     trivy fs \
-      #       --scanners config \
-      #       --severity HIGH,CRITICAL \
-      #       --exit-code 1 \
-      #       .
 
       - name: Trivy Misconfiguration (PCI) Scan
         run: |
@@ -80,22 +68,8 @@ jobs:
 # # Config scanning (with custom rules for generic configs)
 # trivy fs --scanners config --config .trivy-config.yaml --exit-code 1 .
 
-# # Config - include MEDIUM
-# trivy fs --scanners config --severity MEDIUM,HIGH,CRITICAL --exit-code 1 .
 
-# trivy fs --scanners misconfig --custom-rules .trivy-config.yaml --exit-code 1 .
 
-  # -------------------------
-      # Misconfiguration / PCI Scan (Custom Rules)
-      # -------------------------
-      # - name: Trivy Misconfiguration Scan
-      #   run: |
-      #     trivy fs \
-      #       --scanners misconfig \
-      #       --config .trivy-config.yaml \
-      #       --severity MEDIUM,HIGH,CRITICAL \
-      #       --exit-code 1 \
-      #       .
 
 
             
