@@ -41,6 +41,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-trivy-
 
+# Optional: Only download/update DB (useful in CI/CD or air-gapped env)
+      - name: Download Trivy DB only
+        run: |
+          trivy --download-db-only
+          trivy --download-java-db-only
+          
    # Secret Scanning
       - name: Trivy Secret Scan
         run: |
