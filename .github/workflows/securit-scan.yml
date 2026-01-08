@@ -7,14 +7,16 @@ on:
   pull_request:
     branches:
       - '**'
-      # For trivy to store download in DB
- env:
-      TRIVY_CACHE_DIR: ~/.cache/trivy
+     
     
 jobs:
   trivy-scan:
     name: Trivy Security Scan
     runs-on: ubuntu-latest
+
+ # For trivy to store download in DB
+    env:
+      TRIVY_CACHE_DIR: ~/.cache/trivy
 
     steps:
       - name: Checkout repository
@@ -30,7 +32,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install trivy -y
 
-      # Cache Trivy DB
+       # Restore / Save Trivy DB cache
       - name: Cache Trivy vulnerability database
         uses: actions/cache@v4
         with:
@@ -39,8 +41,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-trivy-
 
-       - name: Download Trivy DB
-        run: trivy --download-db-only
+      # Download DB only if cache is empty
+      - name: Download Trivy DB
+        run: |
+          trivy --cache-dir ~/.cache/trivy --download-db-only
 
    # Secret Scanning
       - name: Trivy Secret Scan
