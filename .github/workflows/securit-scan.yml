@@ -49,15 +49,26 @@ jobs:
             --exit-code 1 \
             .
 
-             # Misconfiguration / PCI Checks
-      # -------------------------
-      - name: Trivy Config Scan
+      #        # Misconfiguration / PCI Checks
+      # # -------------------------
+      # - name: Trivy Config Scan
+      #   run: |
+      #     trivy fs \
+      #       --scanners config \
+      #       --severity HIGH,CRITICAL \
+      #       --exit-code 1 \
+      #       .
+
+      - name: Trivy Misconfiguration (PCI) Scan
         run: |
-          trivy fs \
-            --scanners config \
-            --severity HIGH,CRITICAL \
-            --exit-code 1 \
-            .
+         trivy fs \
+         --scanners misconfig \
+         --misconfig-scanners=dockerfile,kubernetes,terraform,cloudformation,yaml,json \
+         --config-check ./policies \
+         --severity MEDIUM,HIGH,CRITICAL \
+         --exit-code 1 \
+         .
+
 # Secret scanning
 # trivy fs --scanners secret --severity MEDIUM,HIGH,CRITICAL --exit-code 1 .
 
