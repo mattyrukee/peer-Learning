@@ -39,12 +39,13 @@ jobs:
       #      --file-patterns "text:.*\.env,text:.*\.txt,text:.*\.tf" \
       #       .
 
- # 3. Run Trivy filesystem scan
+# 3. Run Trivy filesystem scan
       - name: Trivy FS Scan
         run: |
           trivy fs . \
             --scanners vuln,secret,misconfig \
             --file-patterns "text:.*\.env,text:.*\.txt,text:.*\.tf" \
+            --disable-allow-rules \
             --include-hidden \
             --ignorefile .trivyignore \
             --exit-code 1 \
