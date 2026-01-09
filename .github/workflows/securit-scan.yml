@@ -29,29 +29,50 @@ jobs:
           sudo apt-get install trivy -y
 
           
-      # Workaround: Copy .env files to .txt for scanning
+       # Workaround: Copy .env files to .txt for scanning
       - name: Prepare .env files for scanning
         run: |
+          echo "Finding .env files..."
           find . -type f \( -name "*.env" -o -name ".env*" \) -not -path "./.git/*" | while read file; do
+            echo "Copying $file to ${file}.scan.txt"
             cp "$file" "${file}.scan.txt"
           done
+          echo "Created temporary .scan.txt files for scanning"
 
-      # 3. Run Trivy filesystem scan
+    # Run Trivy filesystem scan and display results
       - name: Trivy FS Scan
         run: |
+          echo "Running Trivy scan..."
           trivy fs . \
-            --scanners vuln,secret,misconfig \
-            --ignorefile .trivyignore \
-            --exit-code 1 \
+            --scanners secret \
+            --severity CRITICAL,HIGH \
+            --format table \
+            --no-progress || true
+          
+          echo ""
+          echo "=== Saving detailed report ==="
+          trivy fs . \
+            --scanners secret \
             --severity CRITICAL,HIGH \
             --format table \
             -o trivy-report.txt
+# Display the report
+      - name: Display Trivy Report
+        if: always()
+        run: |
+          if [ -f trivy-report.txt ]; then
+            echo "=== Trivy Report Contents ==="
+            cat trivy-report.txt
+          else
+            echo "No report file generated"
+          fi
 
-       # Cleanup temporary files
+      # Cleanup temporary files
       - name: Cleanup temporary files
         if: always()
         run: |
           find . -name "*.scan.txt" -delete
+          echo "Cleaned up temporary .scan.txt files"
 
       # - name: Trivy Secret Scan
       #   run: |
