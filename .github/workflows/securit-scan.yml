@@ -28,13 +28,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install trivy -y
 
-      - name: Trivy Secret Scan (dedicated)
+      - name: Trivy Secret Scan
         run: |
           trivy fs . \
             --scanners secret \
+            --secret-config trivy-secret.yaml \
             --severity HIGH,CRITICAL \
             --exit-code 1 \
             --format table
+
+      # - name: Trivy Secret Scan (dedicated)
+      #   run: |
+      #     trivy fs . \
+      #       --scanners secret \
+      #       --severity HIGH,CRITICAL \
+      #       --exit-code 1 \
+      #       --format table
 
    # Secret Scanning
       # -------------------------
