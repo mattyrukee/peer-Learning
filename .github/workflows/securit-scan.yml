@@ -36,10 +36,7 @@ jobs:
             --scanners secret \
             --severity HIGH,CRITICAL \
             --exit-code 1 \
-            --no-ignore \
-            --include "**/*.env" \
-            --include "**/*.txt" \
-            --include "**/*.tf" \
+            --file-patterns "**/*.env,**/*.txt,**/*.tf" \
             .
 
         # -------------------------
