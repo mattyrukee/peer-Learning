@@ -36,10 +36,9 @@ jobs:
             --scanners secret \
             --severity HIGH,CRITICAL \
             --exit-code 1 \
-            --include "**/*.env" \
             .
 
-              # -------------------------
+        # -------------------------
       # Vulnerability Scanning
       # -------------------------
       - name: Trivy Vulnerability Scan
