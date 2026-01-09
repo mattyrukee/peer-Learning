@@ -28,14 +28,39 @@ jobs:
           sudo apt-get update
           sudo apt-get install trivy -y
 
-      - name: Trivy Secret Scan
+           # Workaround: Copy .env files to .txt for scanning
+      - name: Prepare .env files for scanning
+        run: |
+          find . -type f \( -name "*.env" -o -name ".env*" \) -not -path "./.git/*" | while read file; do
+            cp "$file" "${file}.scan.txt"
+          done
+
+            # 3. Run Trivy filesystem scan
+      - name: Trivy FS Scan
         run: |
           trivy fs . \
-            --scanners secret \
-            --secret-config trivy-secret.yaml \
-            --severity HIGH,CRITICAL \
+            --scanners vuln,secret,misconfig \
+            --include-hidden \
+            --ignorefile .trivyignore \
             --exit-code 1 \
-            --format table
+            --severity CRITICAL,HIGH \
+            --format table \
+            -o trivy-report.txt
+
+      # Cleanup temporary files
+      - name: Cleanup temporary files
+        if: always()
+        run: |
+          find . -name "*.scan.txt" -delete
+
+      # - name: Trivy Secret Scan
+      #   run: |
+      #     trivy fs . \
+      #       --scanners secret \
+      #       --secret-config trivy-secret.yaml \
+      #       --severity HIGH,CRITICAL \
+      #       --exit-code 1 \
+      #       --format table
 
       # - name: Trivy Secret Scan (dedicated)
       #   run: |
