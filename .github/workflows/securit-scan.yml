@@ -20,13 +20,12 @@ jobs:
 
       - name: Install Trivy
         run: |
-          sudo apt-get update
-          sudo apt-get install wget apt-transport-https gnupg lsb-release -y
-          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/trivy.list
-          sudo apt-get update
-          sudo apt-get install trivy -y
-          trivy --version  # Verify version
+          # Download latest Trivy binary from GitHub
+          wget -qO - https://api.github.com/repos/aquasecurity/trivy/releases/latest | grep "browser_download_url.*Linux-64bit.tar.gz" | cut -d '"' -f 4 | xargs wget -qO trivy.tar.gz
+          tar -xzf trivy.tar.gz
+          sudo mv trivy /usr/local/bin/
+          sudo chmod +x /usr/local/bin/trivy
+          trivy --version
         
  # # Step 7: Install Trivy
  #      - name: Install Trivy
@@ -38,13 +37,25 @@ jobs:
  #          sudo apt-get update
  #          sudo apt-get install trivy -y
 
-      - name: Trivy Secret Scan (dedicated)
+      - name: Trivy FS Scan
         run: |
           trivy fs . \
-            --scanners secret \
-            --severity HIGH,CRITICAL \
+            --scanners vuln,secret,misconfig \
+            --disable-allow-rules \
+            --include-hidden \
+            --ignorefile .trivyignore \
             --exit-code 1 \
-            --format table
+            --severity CRITICAL,HIGH \
+            --format table \
+            -o trivy-report.txt
+
+      # - name: Trivy Secret Scan (dedicated)
+      #   run: |
+      #     trivy fs . \
+      #       --scanners secret \
+      #       --severity HIGH,CRITICAL \
+      #       --exit-code 1 \
+      #       --format table
 
    # Secret Scanning
       # -------------------------
