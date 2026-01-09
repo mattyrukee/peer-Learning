@@ -1,2 +1,3 @@
 # Only ignore verified false positives
 # DO NOT ignore secrets or PCI issues
+*.env
