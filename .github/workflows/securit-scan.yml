@@ -39,19 +39,14 @@ jobs:
       #      --file-patterns "text:.*\.env,text:.*\.txt,text:.*\.tf" \
       #       .
 
-# 3. Run Trivy filesystem scan
-      - name: Trivy FS Scan
+      - name: Trivy Secret Scan (with .env files)
         run: |
           trivy fs . \
-            --scanners vuln,secret,misconfig \
-            --file-patterns "text:.*\.env,text:.*\.txt,text:.*\.tf" \
-            --disable-allow-rules \
-            --include-hidden \
-            --ignorefile .trivyignore \
-            --exit-code 1 \
-            --severity CRITICAL,HIGH \
-            --format table \
-            -o trivy-report.txt
+          --scanners secret \
+          --disable-allow-rules \
+          --severity HIGH,CRITICAL \
+          --exit-code 1 \
+          --format table
         # -------------------------
       # Vulnerability Scanning
       # -------------------------
