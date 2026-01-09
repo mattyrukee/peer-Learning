@@ -38,6 +38,14 @@ jobs:
  #          sudo apt-get update
  #          sudo apt-get install trivy -y
 
+      - name: Trivy Secret Scan (dedicated)
+        run: |
+          trivy fs . \
+            --scanners secret \
+            --severity HIGH,CRITICAL \
+            --exit-code 1 \
+            --format table
+
    # Secret Scanning
       # -------------------------
       # - name: Trivy Secret Scan
@@ -49,14 +57,14 @@ jobs:
       #      --file-patterns "text:.*\.env,text:.*\.txt,text:.*\.tf" \
       #       .
 
-      - name: Trivy Secret Scan (with .env files)
-        run: |
-          trivy fs . \
-          --scanners secret \
-          --disable-allow-rules \
-          --severity HIGH,CRITICAL \
-          --exit-code 1 \
-          --format table
+      # - name: Trivy Secret Scan (with .env files)
+      #   run: |
+      #     trivy fs . \
+      #     --scanners secret \
+      #     --disable-allow-rules \
+      #     --severity HIGH,CRITICAL \
+      #     --exit-code 1 \
+      #     --format table
         # -------------------------
       # Vulnerability Scanning
       # -------------------------
