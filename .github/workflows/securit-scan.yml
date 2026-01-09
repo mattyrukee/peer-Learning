@@ -30,15 +30,27 @@ jobs:
 
    # Secret Scanning
       # -------------------------
-      - name: Trivy Secret Scan
-        run: |
-          trivy fs \
-            --scanners secret \
-            --severity HIGH,CRITICAL \
-            --exit-code 1 \
-           --file-patterns "text:.*\.env,text:.*\.txt,text:.*\.tf" \
-            .
+      # - name: Trivy Secret Scan
+      #   run: |
+      #     trivy fs \
+      #       --scanners secret \
+      #       --severity HIGH,CRITICAL \
+      #       --exit-code 1 \
+      #      --file-patterns "text:.*\.env,text:.*\.txt,text:.*\.tf" \
+      #       .
 
+ # 3. Run Trivy filesystem scan
+      - name: Trivy FS Scan
+        run: |
+          trivy fs . \
+            --scanners vuln,secret,misconfig \
+            --file-patterns "text:.*\.env,text:.*\.txt,text:.*\.tf" \
+            --include-hidden \
+            --ignorefile .trivyignore \
+            --exit-code 1 \
+            --severity CRITICAL,HIGH \
+            --format table \
+            -o trivy-report.txt
         # -------------------------
       # Vulnerability Scanning
       # -------------------------
