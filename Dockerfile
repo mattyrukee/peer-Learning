@@ -1,16 +1,23 @@
+FROM ubuntu:18.04
 
+# Running as root (MEDIUM/HIGH)
+USER root
 
-# FROM ubuntu:18.04
+# Installing packages without version pinning (MEDIUM)
+RUN apt-get update && apt-get install -y curl wget
 
-# # 1. Running as root (MEDIUM → escalates depending on policy)
-# USER root
+# Using latest tag (best practice violation)
+FROM node:latest
 
-# # 2. Installing packages without pinning versions
-# RUN apt-get update && apt-get install -y curl wget
+# Running container as root (HIGH)
+USER root
 
-# # 3. Writing insecure sudo rule (HIGH severity)
-# RUN echo "root ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+# Exposing all ports (MEDIUM)
+EXPOSE 0-65535
 
+# No healthcheck (MEDIUM)
+# Copying secrets directly (HIGH if secrets exist)
+COPY . /app
 
-# # 4. Using latest tag implicitly via base image (best-practice violation)
-
+WORKDIR /app
+CMD ["node", "app.js"]
