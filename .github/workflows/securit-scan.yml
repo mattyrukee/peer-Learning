@@ -275,6 +275,7 @@ jobs:
             --config-check ./policies \
             --severity MEDIUM,HIGH,CRITICAL \
             --exit-code 1
+            
 
 #       - name: Cleanup
 #         if: always()
