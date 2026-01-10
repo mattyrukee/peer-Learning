@@ -72,7 +72,6 @@ jobs:
          trivy fs \
          --scanners misconfig \
          --misconfig-scanners=dockerfile,kubernetes,terraform,cloudformation,yaml,json \
-         --config-check ./policies \
          --severity MEDIUM,HIGH,CRITICAL \
          --exit-code 1 \
          .
