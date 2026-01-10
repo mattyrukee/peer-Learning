@@ -152,6 +152,72 @@
 
 
 
+# name: Security Scans (Trivy)
+# on:
+#   push:
+#     branches: ['**']
+#   pull_request:
+#     branches: ['**']
+    
+# jobs:
+#   trivy-scan:
+#     name: Trivy Security Scan
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
+
+#       - name: Install Trivy
+#         run: |
+#           sudo apt-get update
+#           sudo apt-get install wget apt-transport-https gnupg lsb-release -y
+#           wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+#           echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/trivy.list
+#           sudo apt-get update
+#           sudo apt-get install trivy -y
+
+#       - name: Cache Trivy vulnerability database
+#         uses: actions/cache@v4
+#         with:
+#           path: ~/.cache/trivy
+#           key: ${{ runner.os }}-trivy-db
+#           restore-keys: |
+#             ${{ runner.os }}-trivy-
+
+#       - name: Prepare .env files for scanning
+#         run: |
+#           [ -f trivy-secret.yaml ] && [ ! -s trivy-secret.yaml ] && rm -f trivy-secret.yaml || true
+#           counter=1
+#           find . -type f \( -name "*.env" -o -name ".env*" \) -not -path "./.git/*" | while read file; do
+#             cp "$file" "secrets-for-scan-${counter}.txt"
+#             ((counter++))
+#           done
+
+#       - name: Secret Scan
+#         run: |
+#           trivy fs . \
+#             --scanners secret \
+#             --severity CRITICAL,HIGH \
+#             --exit-code 1
+
+#       - name: Vulnerability Scan
+#         run: |
+#           trivy fs . \
+#             --scanners vuln \
+#             --severity HIGH,CRITICAL \
+#             --exit-code 1
+
+#       - name: Misconfiguration Scan
+#         run: |
+#           trivy fs . \
+#             --scanners misconfig \
+#             --misconfig-scanners dockerfile,kubernetes,terraform,cloudformation,yaml,json \
+#             --config-check ./policies \
+#             --severity MEDIUM,HIGH,CRITICAL \
+#             --exit-code 1
+
+
 name: Security Scans (Trivy)
 on:
   push:
@@ -185,20 +251,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-trivy-
 
-      - name: Prepare .env files for scanning
-        run: |
-          [ -f trivy-secret.yaml ] && [ ! -s trivy-secret.yaml ] && rm -f trivy-secret.yaml || true
-          counter=1
-          find . -type f \( -name "*.env" -o -name ".env*" \) -not -path "./.git/*" | while read file; do
-            cp "$file" "secrets-for-scan-${counter}.txt"
-            ((counter++))
-          done
-
       - name: Secret Scan
         run: |
+          [ -f trivy-secret.yaml ] && [ ! -s trivy-secret.yaml ] && rm -f trivy-secret.yaml || true
           trivy fs . \
             --scanners secret \
             --severity CRITICAL,HIGH \
+            --format table \
             --exit-code 1
 
       - name: Vulnerability Scan
@@ -217,7 +276,7 @@ jobs:
             --severity MEDIUM,HIGH,CRITICAL \
             --exit-code 1
 
-      - name: Cleanup
-        if: always()
-        run: |
+#       - name: Cleanup
+#         if: always()
+#         run: |
           rm -f secrets-for-scan-*.txt
