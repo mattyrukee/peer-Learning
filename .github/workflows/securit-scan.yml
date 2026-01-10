@@ -251,14 +251,19 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-trivy-
 
-      # - name: Secret Scan
-      #   run: |
-      #     [ -f trivy-secret.yaml ] && [ ! -s trivy-secret.yaml ] && rm -f trivy-secret.yaml || true
-      #     trivy fs . \
-      #       --scanners secret \
-      #       --severity CRITICAL,HIGH \
-      #       --format table \
-      #       --exit-code 1
+      - name: Prepare dependency files for scanning
+        run: |
+          [ -f trivy-secret.yaml ] && [ ! -s trivy-secret.yaml ] && rm -f trivy-secret.yaml || true
+          if [ -f package.json ]; then
+            curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+            sudo apt-get install -y nodejs
+            npm install --package-lock-only || true
+          fi
+          if [ -f requirements.txt ]; then
+            sudo apt-get install -y python3 python3-pip || true
+          fi
+  
+
 
       - name: Secret Scan
         run: |
