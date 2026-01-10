@@ -251,7 +251,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-trivy-
 
-       - name: Setup Node.js
+      - name: Setup Node.js
         if: hashFiles('package.json') != ''
         uses: actions/setup-node@v4
         with:
