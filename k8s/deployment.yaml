@@ -1,22 +1,31 @@
-# apiVersion: apps/v1
-# kind: Deployment
-# metadata:
-#   name: insecure-app
-# spec:
-#   replicas: 1
-#   selector:
-#     matchLabels:
-#       app: insecure
-#   template:
-#     metadata:
-#       labels:
-#         app: insecure
-#     spec:
-#       containers:
-#         - name: app
-#           image: nginx:latest
-#           securityContext:
-#             privileged: true
-#             runAsUser: 0
-#           ports:
-#             - containerPort: 80
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: insecure-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: insecure
+  template:
+    metadata:
+      labels:
+        app: insecure
+    spec:
+      containers:
+        - name: app
+          image: nginx:latest
+          securityContext:
+            privileged: true
+            runAsUser: 0
+            allowPrivilegeEscalation: true
+            capabilities:
+              add:
+                - ALL
+          ports:
+            - containerPort: 80
+          env:
+            - name: PASSWORD
+              value: "secret123"
+      hostNetwork: true
+      hostPID: true
