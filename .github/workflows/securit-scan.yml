@@ -152,7 +152,7 @@
 
 
 
-            name: Security Scans (Trivy)
+name: Security Scans (Trivy)
 on:
   push:
     branches: ['**']
