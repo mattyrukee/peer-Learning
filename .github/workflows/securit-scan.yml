@@ -277,7 +277,7 @@ jobs:
             --exit-code 1
             
 
-#       - name: Cleanup
-#         if: always()
-#         run: |
-          rm -f secrets-for-scan-*.txt
+# #       - name: Cleanup
+# #         if: always()
+# #         run: |
+#           rm -f secrets-for-scan-*.txt
