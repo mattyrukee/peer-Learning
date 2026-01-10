@@ -27,45 +27,59 @@ jobs:
           echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/trivy.list
           sudo apt-get update
           sudo apt-get install trivy -y
-
           
-       # Workaround: Copy .env files to completely different names without .env in them
+ # Cache Trivy DB
+      - name: Cache Trivy vulnerability database
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/trivy
+          key: ${{ runner.os }}-trivy-db
+          restore-keys: |
+            ${{ runner.os }}-trivy-
+
+      - name: Update Trivy Databases
+        run: |
+          trivy db update
+          trivy db update --java || true
+
+        # Workaround: Copy .env files to names without .env for secret scanning
       - name: Prepare .env files for scanning
+        id: prepare-env
         run: |
           echo "Finding .env files..."
           counter=1
+          env_files=""
           find . -type f \( -name "*.env" -o -name ".env*" \) -not -path "./.git/*" | while read file; do
             new_name="secrets-for-scan-${counter}.txt"
             echo "Copying $file to $new_name"
             cp "$file" "$new_name"
+            echo "original: $file" >> .env-mapping.txt
+            echo "scanned: $new_name" >> .env-mapping.txt
             counter=$((counter + 1))
           done
           
-          echo ""
-          echo "Created temporary files for scanning:"
-          ls -la secrets-for-scan-*.txt 2>/dev/null || echo "No .env files found to copy"
-
-    # Run Trivy secret scan only (to isolate the issue)
+          if [ -f .env-mapping.txt ]; then
+            echo "=== .env files copied for scanning ==="
+            cat .env-mapping.txt
+          else
+            echo "No .env files found to scan"
+          fi
+      
+ # Secret Scanning (includes copied .env files)
       - name: Trivy Secret Scan
         run: |
-          echo "Running Trivy secret scan..."
-          echo "Files that will be scanned (showing .txt files):"
-          find . -name "*.txt" -not -path "./.git/*" | head -20
-          
-          echo ""
           echo "=== Trivy Secret Scan Results ==="
           trivy fs . \
             --scanners secret \
             --severity CRITICAL,HIGH \
             --format table \
-            --no-progress || true
-
-      # Cleanup temporary files
-      - name: Cleanup temporary files
-        if: always()
-        run: |
-          rm -f secrets-for-scan-*.txt
-          echo "Cleaned up temporary secret scan files"
+            --no-progress \
+            -o trivy-secret-report.txt || true
+          
+          echo ""
+          echo "=== Secret Scan Summary ==="
+          cat trivy-secret-report.txt || echo "No secrets found"
+   
 
       # - name: Trivy Secret Scan
       #   run: |
@@ -123,6 +137,22 @@ jobs:
             --severity HIGH,CRITICAL \
             --exit-code 1 \
             .
+
+      # Cleanup temporary files
+      - name: Cleanup temporary files
+        if: always()
+        run: |
+          rm -f secrets-for-scan-*.txt .env-mapping.txt
+          echo "Cleaned up temporary files"
+
+      # Upload reports as artifacts (optional)
+      - name: Upload Trivy Secret Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-secret-report
+          path: trivy-secret-report.txt
+          retention-days: 7
 
 
 
