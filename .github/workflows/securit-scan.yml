@@ -1,28 +1,19 @@
 name: Security Scans (Trivy)
 on:
   push:
-    branches:
-      - '**'
-
+    branches: ['**']
   pull_request:
-    branches:
-      - '**'
-     
+    branches: ['**']
     
 jobs:
   trivy-scan:
     name: Trivy Security Scan
     runs-on: ubuntu-latest
 
- # For trivy to store download in DB
-    env:
-      TRIVY_CACHE_DIR: ~/.cache/trivy
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
- # Step: Install Trivy
+
       - name: Install Trivy
         run: |
           sudo apt-get update
@@ -32,7 +23,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install trivy -y
 
-       # Restore / Save Trivy DB cache
       - name: Cache Trivy vulnerability database
         uses: actions/cache@v4
         with:
@@ -41,55 +31,27 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-trivy-
 
-  # Download/update Trivy DB
-      - name: Update Trivy Databases
+      - name: Secret Scan
         run: |
-         trivy db update
-         trivy db update --java
-
-          
-   # Secret Scanning
-      - name: Trivy Secret Scan
-        run: |
-          trivy fs \
+          [ -f trivy-secret.yaml ] && [ ! -s trivy-secret.yaml ] && rm -f trivy-secret.yaml || true
+          trivy fs . \
             --scanners secret \
-            --severity HIGH,CRITICAL \
-            --exit-code 1 \
-            .
+            --severity CRITICAL,HIGH \
+            --format table \
+            --exit-code 1
 
-       # -------------------------
-      # Vulnerability Scanning
-      - name: Trivy Vulnerability Scan
+      - name: Vulnerability Scan
         run: |
-          trivy fs \
+          trivy fs . \
             --scanners vuln \
             --severity HIGH,CRITICAL \
-            --exit-code 1 \
-            .
+            --exit-code 1
 
-      - name: Trivy Misconfiguration (PCI) Scan
+      - name: Misconfiguration Scan
         run: |
-         trivy fs \
-         --scanners misconfig \
-         --misconfig-scanners=dockerfile,kubernetes,terraform,cloudformation,yaml,json \
-         --config-check ./policies \
-         --severity MEDIUM,HIGH,CRITICAL \
-         --exit-code 1 \
-         .
-
-# Secret scanning
-# trivy fs --scanners secret --severity MEDIUM,HIGH,CRITICAL --exit-code 1 .
-
-# Vulnerabilities (OS/dependencies)
-# trivy fs --scanners vuln --severity HIGH,CRITICAL --exit-code 1 .
-
-# trivy config --misconfig-scanners=terraform,dockerfile .
-
-# # Config scanning (with custom rules for generic configs)
-# trivy fs --scanners config --config .trivy-config.yaml --exit-code 1 .
-
-
-
-
-
-            
+          trivy fs . \
+            --scanners misconfig \
+            --misconfig-scanners dockerfile,kubernetes,terraform,cloudformation,yaml,json \
+            --config-check ./policies \
+            --severity MEDIUM,HIGH,CRITICAL \
+            --exit-code 1
