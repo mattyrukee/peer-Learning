@@ -251,14 +251,24 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-trivy-
 
+      # - name: Secret Scan
+      #   run: |
+      #     [ -f trivy-secret.yaml ] && [ ! -s trivy-secret.yaml ] && rm -f trivy-secret.yaml || true
+      #     trivy fs . \
+      #       --scanners secret \
+      #       --severity CRITICAL,HIGH \
+      #       --format table \
+      #       --exit-code 1
+
       - name: Secret Scan
         run: |
-          [ -f trivy-secret.yaml ] && [ ! -s trivy-secret.yaml ] && rm -f trivy-secret.yaml || true
+          rm -f trivy-secret.yaml
           trivy fs . \
             --scanners secret \
             --severity CRITICAL,HIGH \
             --format table \
             --exit-code 1
+
 
       - name: Vulnerability Scan
         run: |
