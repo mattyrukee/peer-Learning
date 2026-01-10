@@ -29,50 +29,43 @@ jobs:
           sudo apt-get install trivy -y
 
           
-       # Workaround: Copy .env files to .txt for scanning
+       # Workaround: Copy .env files to completely different names without .env in them
       - name: Prepare .env files for scanning
         run: |
           echo "Finding .env files..."
+          counter=1
           find . -type f \( -name "*.env" -o -name ".env*" \) -not -path "./.git/*" | while read file; do
-            echo "Copying $file to ${file}.scan.txt"
-            cp "$file" "${file}.scan.txt"
+            new_name="secrets-for-scan-${counter}.txt"
+            echo "Copying $file to $new_name"
+            cp "$file" "$new_name"
+            counter=$((counter + 1))
           done
-          echo "Created temporary .scan.txt files for scanning"
+          
+          echo ""
+          echo "Created temporary files for scanning:"
+          ls -la secrets-for-scan-*.txt 2>/dev/null || echo "No .env files found to copy"
 
-    # Run Trivy filesystem scan and display results
-      - name: Trivy FS Scan
+    # Run Trivy secret scan only (to isolate the issue)
+      - name: Trivy Secret Scan
         run: |
-          echo "Running Trivy scan..."
+          echo "Running Trivy secret scan..."
+          echo "Files that will be scanned (showing .txt files):"
+          find . -name "*.txt" -not -path "./.git/*" | head -20
+          
+          echo ""
+          echo "=== Trivy Secret Scan Results ==="
           trivy fs . \
             --scanners secret \
             --severity CRITICAL,HIGH \
             --format table \
             --no-progress || true
-          
-          echo ""
-          echo "=== Saving detailed report ==="
-          trivy fs . \
-            --scanners secret \
-            --severity CRITICAL,HIGH \
-            --format table \
-            -o trivy-report.txt
-# Display the report
-      - name: Display Trivy Report
-        if: always()
-        run: |
-          if [ -f trivy-report.txt ]; then
-            echo "=== Trivy Report Contents ==="
-            cat trivy-report.txt
-          else
-            echo "No report file generated"
-          fi
 
       # Cleanup temporary files
       - name: Cleanup temporary files
         if: always()
         run: |
-          find . -name "*.scan.txt" -delete
-          echo "Cleaned up temporary .scan.txt files"
+          rm -f secrets-for-scan-*.txt
+          echo "Cleaned up temporary secret scan files"
 
       # - name: Trivy Secret Scan
       #   run: |
