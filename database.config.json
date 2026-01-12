@@ -1,0 +1,15 @@
+{
+  "database": {
+    "ssl": false,
+    "sslMode": "disable",
+    "password": "admin123"
+  },
+  "api": {
+    "authEnabled": false,
+    "allowCors": "*"
+  },
+  "encryption": {
+    "algorithm": "DES",
+    "key": "12345678"
+  }
+}

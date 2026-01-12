@@ -1,0 +1,26 @@
+database:
+  ssl: false
+  password: "hardcoded-password-123"
+  sslMode: "disable"
+
+server:
+  tls:
+    enabled: false
+    insecureSkipVerify: true
+  host: "0.0.0.0"
+
+api:
+  authEnabled: false
+  allowCors: "*"
+  password: "api-password-123"
+
+security:
+  cors:
+    allowOrigin: "*"
+
+encryption:
+  algorithm: "DES"
+
+logging:
+  level: "debug"
+  exposeStackTraces: true
