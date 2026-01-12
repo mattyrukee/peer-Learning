@@ -44,14 +44,15 @@ jobs:
             npm install --package-lock-only || true
           fi
 
-     - name: Secret Scan
+      - name: Secret Scan
         run: |
-          rm -f trivy-secret.yaml
+         rm -f trivy-secret.yaml
           trivy fs . \
-            --scanners secret \
-            --severity CRITICAL,HIGH \
-            --format table \
-            --exit-code 1
+           --scanners secret \
+           --secret-config trivy-secret.yaml \
+           --severity CRITICAL,HIGH \
+           --format table \
+           --exit-code 1
 
       - name: Vulnerability Scan
         run: |
@@ -68,3 +69,4 @@ jobs:
             --severity MEDIUM,HIGH,CRITICAL \
             --exit-code 1
             
+
