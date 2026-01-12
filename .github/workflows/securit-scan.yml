@@ -44,15 +44,16 @@ jobs:
           if [ -f package.json ]; then
             npm install --package-lock-only || true
           fi
-          
-      - name: Secret Scan
-        run: |
-          rm -f trivy-secret.yaml
-          trivy fs . \
-            --scanners secret \
-            --severity CRITICAL,HIGH \
-            --format table \
-            --exit-code 1
+
+          - name: Secret Scan
+  run: |
+    rm -f trivy-secret.yaml
+    trivy fs . \
+      --scanners secret \
+      --secret-config trivy-secret.yaml \
+      --severity CRITICAL,HIGH \
+      --format table \
+      --exit-code 1
 
       - name: Vulnerability Scan
         run: |
